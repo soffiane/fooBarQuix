@@ -1,55 +1,95 @@
 package com.onepoint;
 
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * The Foo bar qix class.
+ */
 public class FooBarQix {
 
+    /**
+     * Constants for the String Qix, Foo and Bar.
+     */
     private static final String QIX = "Qix";
     private static final String BAR = "Bar";
     private static final String FOO = "Foo";
 
-    Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * logger.
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    private static String apply(int num, String numberToCompute) {
-        StringBuilder sb = new StringBuilder();
+    /**
+     * Compute the input string.
+     *
+     * @param num             the number to compute in Integer
+     * @param numberToCompute the String value to compute
+     * @return the computed String
+     */
+    private static String apply(final int num, final String numberToCompute) {
+        String result = "";
         //first we check if the num isDivisible by 3,5 and/or 7
         if (num % 3 == 0) {
-            sb.append(FOO);
+            result += FOO;
         }
         if (num % 5 == 0) {
-            sb.append(BAR);
+            result += BAR;
         }
         if (num % 7 == 0) {
-            sb.append(QIX);
+            result += QIX;
         }
 
-        //then, we add extra Foo, Bar, Qix string for each occurrence of 3,5 and 7 in num
-        numberToCompute.chars().forEach(c -> {
-            if ((char) c == '3') {
-                sb.append(FOO);
-            } else if ((char) c == '5') {
-                sb.append(BAR);
-            } else if ((char) c == '7') {
-                sb.append(QIX);
-            }
-        });
-        //if num is not divisible by 3,5,7 and does not contain a 3,5 or 7
-        //we just return that number
-        if (sb.length() == 0) {
-            sb.append(num);
-        }
-        //step 2 : replace 0 by *
-        return sb.toString();
+        //if the value to compute is not divisible by 3,5 or 7, we set this boolean to false to indicate that we are going to return the original number
+        final boolean isDivisible = !result.isEmpty();
+        final boolean containsThreeFiveSeven = numberToCompute.contains("3") || numberToCompute.contains("5") || numberToCompute.contains("7");
+
+        result += numberToCompute.chars()
+                .mapToObj(c -> (char) c)
+                .map(i -> getString(isDivisible,containsThreeFiveSeven, i))
+                .reduce("", (partialString, element) -> partialString + element);
+
+        return result;
     }
 
-    public String compute(String numberToCompute) {
+    /**
+     * Add extra Foo, Bar, Qix string for each occurrence of 3,5 and 7 in num
+     * and replace the 0 by * in string.
+     *
+     * @param isDivisible if the num is divisible by 3,5 and/or 7
+     * @param containsThreeFiveSeven
+     * @param i           the char of String to compute
+     * @return the computed char
+     */
+    private static String getString(final boolean isDivisible, final boolean containsThreeFiveSeven, final Character i) {
+        if(isDivisible || containsThreeFiveSeven){
+            if (i == '0') {
+                return "*";
+            } else if (i == '3') {
+                return FOO;
+            } else if (i == '5') {
+                return BAR;
+            } else if (i == '7') {
+                return QIX;
+            }
+        } else {
+            if(i == '0'){
+                return "*";
+            } else return String.valueOf(i);
+        }
+        return "";
+    }
+
+    /**
+     * Method to compute string.
+     *
+     * @param numberToCompute the number to compute
+     * @return the computed string
+     */
+    public String compute(final String numberToCompute) {
 
         Integer number;
         String result = "";
@@ -58,26 +98,6 @@ public class FooBarQix {
             number = Integer.valueOf(numberToCompute);
             result = IntStream.of(number).mapToObj(num -> apply(num, numberToCompute)).collect(Collectors.joining());
 
-            //STEP 2 : replace 0 in number by *
-            final boolean isDivisible = !result.equals("");
-
-            result += numberToCompute.chars()
-                    .mapToObj(c -> (char) c)
-                    .map(i -> {
-                        return i == '0'
-                                ? ("*")
-                                : (i == '3'
-                                ? (FOO)
-                                : (i == '5'
-                                ? (BAR)
-                                : (i == '7'
-                                ? (QIX)
-                                : (!isDivisible
-                                ? (String.valueOf(i))
-                                : ("")))));
-                    })
-                    .reduce("", (partialString, element) -> partialString + element);
-
         } catch (NumberFormatException e) {
             logger.log(Level.SEVERE, e.getMessage());
         }
@@ -85,24 +105,13 @@ public class FooBarQix {
         return result;
     }
 
-    public static void main(String... args) {
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
+    public static void main(final String... args) {
         FooBarQix fooBarQix = new FooBarQix();
-        /*for (int i = 1; i < 100; i++) {
-            System.out.println(fooBarQix.compute(String.valueOf(i)));
-        }*/
-        System.out.println(fooBarQix.compute(String.valueOf(101)));
-        System.out.println(fooBarQix.compute(String.valueOf(303)));
-        System.out.println(fooBarQix.compute(String.valueOf(105)));
-        System.out.println(fooBarQix.compute(String.valueOf(10101)));
-        System.out.println(fooBarQix.compute(String.valueOf(10)));
-        System.out.println(fooBarQix.compute(String.valueOf(20)));
-        System.out.println(fooBarQix.compute(String.valueOf(30)));
-        System.out.println(fooBarQix.compute(String.valueOf(40)));
-        System.out.println(fooBarQix.compute(String.valueOf(50)));
-        System.out.println(fooBarQix.compute(String.valueOf(60)));
-        System.out.println(fooBarQix.compute(String.valueOf(70)));
-        System.out.println(fooBarQix.compute(String.valueOf(80)));
-        System.out.println(fooBarQix.compute(String.valueOf(90)));
-        System.out.println(fooBarQix.compute(String.valueOf(100)));
+        System.out.println(fooBarQix.compute(args[0]));
     }
 }
